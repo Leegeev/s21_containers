@@ -5,15 +5,15 @@ namespace s21 {
     template <typename T>
     class list {
         public:
-        class Node;
-        class iterator; // название как в стандартной библиотеке
-        class const_iterator;
+        class ListNode;
+        class ListIterator; // название как в стандартной библиотеке
+        class ListConstIterator;
 
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
-        using iterator = list<T>::ListIterator<T>;
-        using const_iterator = list<T>::ListConstIterator<T>;
+        using ListIterator = list<value_type>::ListIterator<value_type>;
+        using ListConstIterator = list<value_type>::ListConstIterator<value_type>;
         using size_type = std::size_t;
 
         list();                                                  //  default constructor, creates empty list 
@@ -22,22 +22,23 @@ namespace s21 {
         list(const list &l);                                     // copy constructor
         list(list &&l);                                          // move constructor
         ~list();                                                 // destructor
-        operator=(list &&l);                                     // assignment operator overload for moving object
+        list& operator=(list &&l);                               // assignment operator overload for moving object
+        list& operator=(const list& other);
 
         const_reference front();
         const_reference back();
-        const_iterator cbegin() const;
-        const_iterator cend() const;
+        ListConstIterator cbegin() const;
+        ListConstIterator cend() const;
 
-        iterator begin();
-        iterator end();
+        ListIterator begin();
+        ListIterator end();
 
         bool empty();
         size_type size();
         size_type max_size();
 
         void clear();
-        iterator insert(iterator pos, const_reference value);
+        ListIterator insert(iterator pos, const_reference value);
         void erase(iterator pos);
         void push_back(const_reference value);
         void pop_back();
@@ -45,35 +46,49 @@ namespace s21 {
         void pop_front();
         void swap(list& other);
         void merge(list& other);
-        void splice(const_iterator pos, list& other);
+        void splice(ListConstIterator pos, list& other);
         void reverse();
         void unique();
         void sort();
         
 
         private:
-        Node *head{nullptr};
-        Node *tail{nullptr};
+        ListNode *head{nullptr};
+        ListNode *tail{nullptr};
     };
 
-    template <typename T>
-    class list<T>::Node {
+    template <typename value_type>
+    class list<value_type>::ListNode {
         public:
-        Node(const T& value = T{}, Node* prev = nullptr, Node* next = nullptr);
-        T data;
-        Node *prev;
-        Node *next;
-    }
+        ListNode(const value_type& value = value_type{}, ListNode* prev = nullptr, ListNode* next = nullptr);
+        value_type data;
+        ListNode *prev;
+        ListNode *next;
+    };
 
-    template <typename T>
-    class list<T>::iterator {
+    template <typename value_type>
+    class list<value_type>::ListIterator {
+        public:
+        friend class list;
+        ListIterator& operator++();
+        ListIterator& operator--();
+        ListIterator operator++(int);
+        ListIterator operator--(int);
+        bool operator==(const ListIterator &other) const;
+        bool operator!=(const ListIterator &other) const;
+        ListIterator operator+(size_type n) const;
+        ListIterator operator-(size_type n) const;
+        reference operator*() const;
+        
+        private:
+        ListNode* node_{nullptr};
+    };
 
-    }
-
-    template <typename T>
-    class list<T>::const_iterator : iterator {
-
-    }
+    template <typename value_type>
+    class list<value_type>::ListConstIterator : public ListIterator {
+        public:
+        friend class list;
+    };
 }
 
 
