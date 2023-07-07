@@ -105,10 +105,17 @@ namespace s21 {
         ListConstIterator operator+(size_type n) const;
         ListConstIterator operator-(size_type n) const;
         reference operator*() const;
+
         private:
         ListNode* node_{nullptr};
     };
 }
 
+/*
 
+следить за тем, что необязательно реализовывать все методы,
+некоторые возможно будут дублироваться,
+а некоторых возможно и вовсе не хватает
+
+*/
 #endif
