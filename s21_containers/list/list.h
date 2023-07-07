@@ -6,7 +6,7 @@ namespace s21 {
     class list {
         public:
         class ListNode;
-        class ListIterator; // название как в стандартной библиотеке
+        class ListIterator;
         class ListConstIterator;
 
         using value_type = T;
@@ -70,6 +70,10 @@ namespace s21 {
     class list<value_type>::ListIterator {
         public:
         friend class list;
+
+        ListIterator();
+        ListIterator(const List& it);
+
         ListIterator& operator++();
         ListIterator& operator--();
         ListIterator operator++(int);
@@ -88,6 +92,21 @@ namespace s21 {
     class list<value_type>::ListConstIterator : public ListIterator {
         public:
         friend class list;
+
+        ListConstIterator();
+        ListConstIterator(const List& it);
+
+        ListConstIterator& operator++();
+        ListConstIterator& operator--();
+        ListConstIterator operator++(int);
+        ListConstIterator operator--(int);
+        bool operator==(const ListConstIterator &other) const;
+        bool operator!=(const ListConstIterator &other) const;
+        ListConstIterator operator+(size_type n) const;
+        ListConstIterator operator-(size_type n) const;
+        reference operator*() const;
+        private:
+        ListNode* node_{nullptr};
     };
 }
 
