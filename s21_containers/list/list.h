@@ -1,6 +1,7 @@
 #ifndef S21_CONTAINERS_LIST_H
 #define S21_CONTAINERS_LIST_H
 
+
 namespace s21 {
     template <typename T>
     class list {
@@ -60,7 +61,7 @@ namespace s21 {
     template <typename value_type>
     class list<value_type>::ListNode {
         public:
-        ListNode(const value_type& value = value_type{}, ListNode* prev = nullptr, ListNode* next = nullptr);
+        ListNode(const value_type& val = value_type{}, ListNode* p = nullptr, ListNode* n = nullptr);
         value_type data;
         ListNode *prev;
         ListNode *next;
@@ -109,8 +110,10 @@ namespace s21 {
         private:
         ListNode* node_{nullptr};
     };
-}
 
+
+
+#include "list.tpp"
 /*
 
 следить за тем, что необязательно реализовывать все методы,
