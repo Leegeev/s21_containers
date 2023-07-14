@@ -1,5 +1,5 @@
-#ifndef CPP2_S21_CONTAINERS_VECTOR_VECTOR_H_
-#define CPP2_S21_CONTAINERS_VECTOR_VECTOR_H_
+#ifndef CPP2_S21_CONTAINERS_VECTOR_S21_VECTOR_H_
+#define CPP2_S21_CONTAINERS_VECTOR_S21_VECTOR_H_
 
 #include <initializer_list>
 #include <limits>
@@ -15,17 +15,16 @@ template <class T>
 class s21_vector {
  public:
   // types
-  using iterator_category = std::forward_iterator_tag;
   using value_type = T;
-  using pointer = T &;
-  using const_pointer = const T &;
+  using pointer = value_type *;
+  using const_pointer = const value_type *;
   using reference = value_type &;
   using const_reference = const value_type &;
   using size_type = size_t;
-  using iterator = s21_iterator<T>;
-  using const_iterator = s21_iterator<const T>;
-  using reverse_iterator = s21_reverse_iterator<T>;
-  using const_reverse_iterator = s21_reverse_iterator<const T>;
+  using iterator = s21_iterator<value_type>;
+  using const_iterator = s21_iterator<const value_type>;
+  using reverse_iterator = s21_reverse_iterator<value_type>;
+  using const_reverse_iterator = s21_reverse_iterator<const value_type>;
 
   // constructors and destructors
   explicit s21_vector() : size_(0U), capacity_(0U), arr_(nullptr){};
@@ -108,4 +107,4 @@ class s21_vector {
 };
 }  // namespace s21
 
-#endif  // CPP2_S21_CONTAINERS_VECTOR_VECTOR_H_
+#endif  // CPP2_S21_CONTAINERS_VECTOR_S21_VECTOR_H_

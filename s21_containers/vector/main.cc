@@ -6,15 +6,13 @@
 
 int main(void) {
   s21::s21_vector<int> vec = {1, 2, 3};
-  for (s21::s21_vector<int>::iterator it = vec.begin(); it != vec.end(); it++) {
-    std::cout << *it << " ";
-  }
-  std::cout << "\n";
-
-  for (s21::s21_vector<int>::reverse_iterator it = vec.rbegin();
-       it != vec.rend(); it++) {
-    std::cout << *it << " ";
-  }
-  std::cout << "\n";
+  auto cit = vec.begin();
+  *cit = 8;
+  std::cout << *cit << std::endl;
+  ++cit;
+  *cit = 10;
+  std::cout << *cit << std::endl;
+  --cit;
+  std::cout << *cit << std::endl;
   return 0;
 }
