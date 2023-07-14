@@ -34,7 +34,7 @@ class s21_iterator {
   }
 
   s21_iterator operator++(int) noexcept {
-    // prefix
+    // postfix
     s21_iterator res = *this;
     ++ptr_;
     return res;
