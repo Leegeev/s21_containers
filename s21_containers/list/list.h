@@ -1,5 +1,5 @@
-#ifndef S21_CONTAINERS_LIST_H
-#define S21_CONTAINERS_LIST_H
+#ifndef CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_LIST_H_
+#define CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_LIST_H_
 
 
 namespace s21 {
@@ -111,7 +111,7 @@ namespace s21 {
         ListNode* node_{nullptr};
     };
 
-
+}
 
 #include "list.tpp"
 /*
@@ -121,4 +121,4 @@ namespace s21 {
 а некоторых возможно и вовсе не хватает
 
 */
-#endif
+#endif  // CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_LIST_H_
