@@ -1,6 +1,9 @@
 #ifndef CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_LIST_H_
 #define CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_LIST_H_
 
+#include <initializer_list>
+// #include <limits>
+#include <algorithm>
 
 namespace s21 {
     template <typename T>
@@ -28,14 +31,14 @@ namespace s21 {
 
         const_reference front();
         const_reference back();
-        ListConstIterator cbegin() const;
-        ListConstIterator cend() const;
 
         ListIterator begin();
         ListIterator end();
+        ListConstIterator cbegin() const;
+        ListConstIterator cend() const;
 
         bool empty();
-        size_type size();
+        size_type size() const;
         size_type max_size();
 
         void clear();

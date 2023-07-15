@@ -3,15 +3,16 @@
 namespace s21 {
 
 template <typename value_type>
-list<value_type>::list() {
-    
-}   
+list<value_type>::ListNode::ListNode(const value_type& val, ListNode* p, ListNode* n) : data(val), prev(p), next(n) {}
+
+template <typename value_type>
+list<value_type>::list() : head(nullptr), tail(nullptr) {}
 
 
 template <typename value_type>
 list<value_type>::list(size_type n) {
-
-}   
+    for (; n > 0; n--, push_back(value_type{}))
+}
 
 
 template <typename value_type>
@@ -22,19 +23,21 @@ list<value_type>::list(std::initializer_list<value_type> const &items) {
 
 template <typename value_type>
 list<value_type>::list(const list &l) {
-
-}   
+    for (const_iterator it = l.cbegin(); it != l.cend(); ++it) {
+        push_back(*it);
+    }
+}
 
 
 template <typename value_type>
 list<value_type>::list(list &&l) {
-
-}   
+    swap(l);
+}
 
 
 template <typename value_type>
 list<value_type>::~list() {
-
+    while (head != nullptr) pop_front();
 }   
 
 
@@ -51,55 +54,65 @@ list<value_type>& list<value_type>::operator=(const list& other) {
 
 
 template <typename value_type>
-list<value_type>::const_reference front() {
-
+typename list<value_type>::const_reference list<value_type>::front() {
+    if (empty()) {
+        static const_reference val{};
+        return val;
+    } else {
+        return *begin;
+    }
 }
 
 
 template <typename value_type>
-list<value_type>::const_reference back() {
+typename list<value_type>::const_reference list<value_type>::back() {
+    if (empty()) {
+        static const_reference val{};
+        return val;
+    } else {
+        return *(--end());
+    }
+}
 
+template <typename value_type>
+typename list<value_type>::ListIterator list<value_type>::begin() {
+    return ListIterator(head); // у дани по другому, у него в классе итератора он хранит текущую позицию, голову и хвост
+    // мне в итераторе придется обрабатывать возможность перемещения при вызове
+}
+
+template <typename value_type>
+typename list<value_type>::ListIterator list<value_type>::end() {
+    return ListIterator(tail);
+}
+
+template <typename value_type>
+typename list<value_type>::ListConstIterator list<value_type>::cbegin() const {
+    return ListConstIterator(head);
 }
 
 
 template <typename value_type>
-list<value_type>::ListConstIterator cbegin() const {
-
+typename list<value_type>::ListConstIterator list<value_type>::cend() const {
+    return ListConstIterator(tail);
 }
 
 
 template <typename value_type>
-list<value_type>::ListConstIterator cend() const {
-
+bool list<value_type>::empty() {
+    return head == nullptr;
 }
 
 
 template <typename value_type>
-list<value_type>::ListIterator begin() {
-
+typename list<value_type>::size_type list<value_type>::size() const { // const ot menya
+    size_type i = 0;
+    for (ListConstIterator it = cbegin(); it != cend(); it++, i++);
+    return i;
 }
 
 
 template <typename value_type>
-list<value_type>::ListIterator end() {
-
-}
-
-
-template <typename value_type>
-list<value_type>::bool empty() {
-
-}
-
-
-template <typename value_type>
-list<value_type>::size_type size() {
-
-}
-
-
-template <typename value_type>
-list<value_type>::size_type max_size() {
+typename list<value_type>::size_type list<value_type>::max_size() {
 
 }
 
