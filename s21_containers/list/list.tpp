@@ -118,26 +118,27 @@ typename list<value_type>::size_type list<value_type>::max_size() {
 
 
 template <typename value_type>
-list<value_type>::void clear() {
-
+void list<value_type>::clear() {
+    this->~list(); // вот так вот вручную можно вызвать деструктор?
 }
 
 
 template <typename value_type>
-list<value_type>::ListIterator insert(iterator pos, const_reference value) {
-
+typename list<value_type>::ListIterator list<value_type>::insert(iterator pos, const_reference value) {
+    // че он возвращает?
+    // вставляет на текущую позицию, возвращает итератор на новый элемент?
 }
 
 
 template <typename value_type>
-list<value_type>::void erase(iterator pos) {
-
+void list<value_type>::erase(iterator pos) {
+    
 }
 
 
 template <typename value_type>
 list<value_type>::void push_back(const_reference value) {
-
+    // вставляет в конец
 }
 
 
