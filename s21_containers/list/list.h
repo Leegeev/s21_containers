@@ -57,8 +57,8 @@ namespace s21 {
         
 
         private:
-        ListNode *head{nullptr};
-        ListNode *tail{nullptr};
+        ListNode *head_{nullptr};
+        ListNode *tail_{nullptr};
     };
 
     template <typename value_type>

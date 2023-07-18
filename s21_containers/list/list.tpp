@@ -76,24 +76,29 @@ typename list<value_type>::const_reference list<value_type>::back() {
 
 template <typename value_type>
 typename list<value_type>::ListIterator list<value_type>::begin() {
-    return ListIterator(head); // у дани по другому, у него в классе итератора он хранит текущую позицию, голову и хвост
-    // мне в итераторе придется обрабатывать возможность перемещения при вызове
+    // у дани по другому, у него в классе итератора он хранит текущую позицию, голову и хвост
+    // мне в итераторе придется обрабатывать возможность перемещения при вызове 
+    if (head_) {
+        return iterator(head_);
+    } else {
+        return ListIterator(end_);
+    }
 }
 
 template <typename value_type>
 typename list<value_type>::ListIterator list<value_type>::end() {
-    return ListIterator(tail);
+    return ListIterator(tail_);
 }
 
 template <typename value_type>
 typename list<value_type>::ListConstIterator list<value_type>::cbegin() const {
-    return ListConstIterator(head);
+    return ListConstIterator(head_);
 }
 
 
 template <typename value_type>
 typename list<value_type>::ListConstIterator list<value_type>::cend() const {
-    return ListConstIterator(tail);
+    return ListConstIterator(tail_);
 }
 
 
@@ -124,9 +129,10 @@ void list<value_type>::clear() {
 
 
 template <typename value_type>
-typename list<value_type>::ListIterator list<value_type>::insert(iterator pos, const_reference value) {
+typename list<value_type>::ListIterator list<value_type>::insert(ListIterator pos, const_reference value) {
     // че он возвращает?
     // вставляет на текущую позицию, возвращает итератор на новый элемент?
+    
 }
 
 
