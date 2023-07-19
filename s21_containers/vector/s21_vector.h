@@ -1,19 +1,170 @@
 #ifndef CPP2_S21_CONTAINERS_VECTOR_S21_VECTOR_H_
 #define CPP2_S21_CONTAINERS_VECTOR_S21_VECTOR_H_
 
+#include <cstddef>
 #include <initializer_list>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <new>
 #include <stdexcept>
-
-#include "s21_iterator.h"
 
 namespace s21 {
 
 template <class T>
 class s21_vector {
  public:
+  class s21_iterator {
+   public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
+
+    // constructor
+    explicit s21_iterator(pointer ptr) : ptr_(ptr){};
+
+    // compairson
+    bool operator==(const s21_iterator &other) const noexcept {
+      return ptr_ == other.ptr_;
+    }
+
+    bool operator!=(const s21_iterator &other) const noexcept {
+      return !(*this == other);
+    }
+
+    // increment, decrement
+    s21_iterator &operator++() noexcept {
+      // prefix
+      ++ptr_;
+      return *this;
+    }
+
+    s21_iterator operator++(int) noexcept {
+      // postfix
+      s21_iterator res = *this;
+      ++ptr_;
+      return res;
+    }
+
+    s21_iterator &operator--() noexcept {
+      // prefix
+      --ptr_;
+      return *this;
+    }
+
+    s21_iterator operator--(int) noexcept {
+      // postfix
+      s21_iterator res = *this;
+      --ptr_;
+      return res;
+    }
+
+    // operators
+    s21_iterator operator+(int n) noexcept {
+      s21_iterator res = *this;
+      ptr_ += n;
+      return res;
+    }
+
+    s21_iterator &operator-(int n) noexcept {
+      s21_iterator res = *this;
+      ptr_ -= n;
+      return res;
+    }
+
+    difference_type operator-(const s21_iterator &other) noexcept {
+      return ptr_ - other.ptr_;
+    }
+
+    difference_type operator+(const s21_iterator &other) noexcept {
+      return ptr_ + other.ptr_;
+    }
+
+    // accessors
+    reference operator*() const noexcept { return *ptr_; }
+    pointer operator->() const noexcept { return ptr_; }
+
+   private:
+    pointer ptr_;
+  };
+
+  class s21_reverse_iterator {
+   public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
+
+    // constructor
+    explicit s21_reverse_iterator(pointer ptr) : ptr_(ptr){};
+
+    // compairson
+    bool operator==(const s21_reverse_iterator &other) const noexcept {
+      return ptr_ == other.ptr_;
+    }
+
+    bool operator!=(const s21_reverse_iterator &other) const noexcept {
+      return !(*this == other);
+    }
+
+    // increment, decrememnt
+    s21_reverse_iterator &operator++() noexcept {
+      // prefix
+      --ptr_;
+      return *this;
+    }
+
+    s21_reverse_iterator operator++(int) noexcept {
+      // postfix
+      s21_reverse_iterator res = *this;
+      --ptr_;
+      return res;
+    }
+
+    s21_reverse_iterator &operator--() noexcept {
+      // prefix
+      ++ptr_;
+      return *this;
+    }
+
+    s21_reverse_iterator operator--(int) noexcept {
+      // postfix
+      s21_reverse_iterator res = *this;
+      ++ptr_;
+      return res;
+    }
+
+    // operators
+    s21_reverse_iterator operator+(int n) noexcept {
+      s21_iterator res = *this;
+      ptr_ -= n;
+      return res;
+    }
+
+    s21_reverse_iterator &operator-(int n) noexcept {
+      s21_iterator res = *this;
+      ptr_ += n;
+      return res;
+    }
+
+    difference_type operator-(const s21_reverse_iterator &other) noexcept {
+      return ptr_ + other.ptr_;
+    }
+
+    difference_type operator+(const s21_reverse_iterator &other) noexcept {
+      return ptr_ - other.ptr_;
+    }
+
+    // accessors
+    reference operator*() const noexcept { return *ptr_; }
+    pointer operator->() const noexcept { return ptr_; }
+
+   private:
+    pointer ptr_;
+  };
   // types
   using value_type = T;
   using pointer = value_type *;
@@ -21,13 +172,13 @@ class s21_vector {
   using reference = value_type &;
   using const_reference = const value_type &;
   using size_type = size_t;
-  using iterator = s21_iterator<value_type>;
-  using const_iterator = s21_iterator<const value_type>;
-  using reverse_iterator = s21_reverse_iterator<value_type>;
-  using const_reverse_iterator = s21_reverse_iterator<const value_type>;
+  using iterator = s21_iterator;
+  using const_iterator = s21_iterator;
+  using reverse_iterator = s21_reverse_iterator;
+  using const_reverse_iterator = s21_reverse_iterator;
 
   // constructors and destructors
-  explicit s21_vector() : size_(0U), capacity_(0U), arr_(nullptr){};
+  explicit s21_vector() : arr_(nullptr), size_(0U), capacity_(0U){};
 
   explicit s21_vector(size_type n)
       : size_(n), capacity_(n), arr_(n ? new T[n]() : nullptr){};
@@ -70,18 +221,79 @@ class s21_vector {
 
   // accessors and mutators
 
-  T at(size_type index) const {
+  reference at(size_type index) const {
     if (index >= size_) {
       throw std::out_of_range("index out of range");
     }
     return arr_[index];
   }
   reference operator[](size_type pos) const { return arr_[pos]; }
-  size_type size() const noexcept { return size_; }
-  size_type capacity() const noexcept { return capacity_; }
-
   reference front() noexcept { return arr_[0]; }
   reference back() noexcept { return arr_[size_ - 1]; }
+  pointer data() noexcept { return arr_; }
+
+  bool empty() const noexcept { return size_ == 0; }
+  size_type size() const noexcept { return size_; }
+  size_type max_size() const noexcept {
+    return std::numeric_limits<size_type>::max() / sizeof(value_type);
+  }
+  void reserve(size_type new_capacity) {
+    if (new_capacity > capacity_) {
+      if (new_capacity > max_size())
+        throw std::out_of_range("value out of range");
+      pointer new_arr = new value_type[new_capacity];
+      std::copy(arr_, arr_ + size_, new_arr);
+      delete[] arr_;
+      arr_ = new_arr;
+      capacity_ = new_capacity;
+    }
+  }
+  size_type capacity() const noexcept { return capacity_; }
+  void shrink_to_fit() {
+    if (size_ < capacity_) {
+      pointer new_arr = new value_type[size_];
+      std::copy(arr_, arr_ + size_, new_arr);
+      delete[] arr_;
+      arr_ = new_arr;
+      capacity_ = size_;
+    }
+  }
+
+  void clear() noexcept { size_ = 0U; }
+
+  iterator insert(iterator pos, const_reference value) {
+    if (size_ == capacity_) {
+      reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+    }
+    size_type index = pos - begin();
+    iterator new_pos = begin() + index;
+    for (auto it = end(); it != new_pos; --it) {
+      *it = (*it - 1);
+    }
+    *new_pos = value;
+    ++size_;
+    return new_pos;
+  }
+
+  void erase(iterator pos) {
+    for (iterator it = pos; pos != end() - 1; ++it) {
+      *it = *(it + 1);
+    }
+    --size_;
+  }
+
+  void push_back(const_reference value) {
+    if (size_ == capacity_) {
+      reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+    }
+    auto end_ = end();
+    *end_ = value;
+    ++size_;
+  }
+
+  void pop_back() noexcept { --size_; }
+
+  void resize()
 
   // iterators
   iterator begin() noexcept { return iterator(arr_); }
@@ -93,10 +305,10 @@ class s21_vector {
     return reverse_iterator(arr_ + size_ - 1);
   }
   reverse_iterator rend() noexcept { return reverse_iterator(arr_ - 1); }
-  const_reverse_iterator rcbegin() const noexcept {
+  const_reverse_iterator crbegin() const noexcept {
     return const_reverse_iterator(arr_ + size_ - 1);
   }
-  const_reverse_iterator rcend() const noexcept {
+  const_reverse_iterator crend() const noexcept {
     return const_reverse_iterator(arr_ - 1);
   }
 
