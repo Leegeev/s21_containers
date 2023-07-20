@@ -293,7 +293,27 @@ class s21_vector {
 
   void pop_back() noexcept { --size_; }
 
-  void resize()
+  void resize(size_type count) {
+    if (size_ == capacity_ || capacity_ < count) {
+      reserve(count);
+    }
+    size_ = count;
+  }
+
+  void resize(size_type count, const_reference value) {
+    if (size_ == capacity_ || capacity_ < count) {
+      reserve(count);
+    }
+    if (size_ < count) {
+      iterator it = end();
+      size_type i = 0;
+      while(i < count - size_) {
+        *(it++) = value;
+        ++i;
+      }
+    }
+    size_ = count;
+  }
 
   // iterators
   iterator begin() noexcept { return iterator(arr_); }
