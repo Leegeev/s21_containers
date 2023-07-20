@@ -1,19 +1,16 @@
 #ifndef CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_S21_LIST_H_
 #define CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_S21_LIST_H_
 
-// бля короче сначала сделаю реализацию, а потом уже буду смотреть как инкапсулировать все это дело пиздец
-// 
 
 #include <initializer_list>
 #include <limits>
-#include <algorithm>
+// #include <algorithm>
 
 namespace s21 {
-    template <typename T>
+    template <class T>
     class list {
         private:
-        class ListNode; // добавил френд, потому что поле даты в узле не видело свой тип
-        friend class ListNode;
+        class ListNode;
 
         public:
         class ListIterator;
@@ -39,13 +36,13 @@ namespace s21 {
         } // посмотри видос про списки инициализации
 
         list(const list &l) : list() {
-            for (auto item : l) {
-                push_back(item);
+            for (auto it = l.cbegin(); it != l.cend(); ++it) {
+                push_back(*it);
             }
         }
 
         list(list &&l) : list() {
-            splice(begin(), l);
+            splice(cbegin(), l);
         }
 
         ~list() {
@@ -95,11 +92,11 @@ namespace s21 {
             return *(end()--);
         }
         */
-        const_reference front() {
-            return *begin();
+        const_reference front() const {
+            return *cbegin();
         }
-        const_reference back() {
-            return *(end()--);
+        const_reference back() const {
+            return *(cend()--);
         }
 
         iterator begin() {
@@ -116,24 +113,24 @@ namespace s21 {
             return const_iterator(head_);
         }
 
-        bool empty() {
+        bool empty() const {
             return size_ == 0;
         }
 
         size_type size() const {
             return size_;
         }
-        size_type max_size() {
+        size_type max_size() const {
             return std::numeric_limits<size_type>::max() / sizeof(ListNode) / 2 - 1;
         }
 
-        void clear() { // тут нужно выбрать самый оптимальный метод удаления элемента
+        void clear() {
             while (size_) {
                 erase(begin());
             }
         }
         iterator insert(iterator pos, const_reference value) {
-            ListNode *new_node = new ListNode(value); // конструктор узла по значению создает узел, заполняет его значением и в обе стороны указывает на нулптр
+            ListNode *new_node = new ListNode(value);
             
             pos.node_->BindBeforeCurrent(new_node);
             ++size_;
@@ -165,30 +162,31 @@ namespace s21 {
             std::swap(size_, other.size_);
         }
         void merge(list& other) {
-            if (this != other) {
+            if (this != &other) {
                 ListIterator this_begin = begin(), this_end = end(), other_begin = other.begin(), other_end = other.end();
                 while (this_begin != this_end && other_begin != other_end) {
                     if (*other_begin < *this_begin) {
                         ListNode *tmp = other_begin.node_;
                         ++other_begin;
-                        tmp->UnBind();
-                        this_begin.node->BindBeforeCurrent(tmp);
+                        tmp->Unbind();
+                        this_begin.node_->BindBeforeCurrent(tmp);
                         ++size_;
                     } else {
                         ++this_begin;
                     }
                 }
             }
-            splice(end(), other);
+            splice(cend(), other);
             other.size_ = 0;
         }
-        void splice(const_iterator pos, list& other) {
-            iterator pre_pos = pos - 1, olast = --other.end(), ofirst = other.begin();
-            olast.node_->next = pos.node_;
-            pos.node_->prev_ = olast.node_;
+        void splice(const_iterator pos, list& other) noexcept {
+            iterator curpos{static_cast<ListNode *>(pos.node_)};
+            iterator pre_pos = curpos - 1, olast = --other.end(), ofirst = other.begin();
+            olast.node_->next_ = curpos.node_;
+            curpos.node_->prev_ = olast.node_;
 
-            pre_pos.node_->next = ofirst.node_;
-            ofirst.node_->prev = pre_pos.node_;
+            pre_pos.node_->next_ = ofirst.node_;
+            ofirst.node_->prev_ = pre_pos.node_;
             
             size_ += other.size_;
             other.size_ = 0;
@@ -198,10 +196,10 @@ namespace s21 {
         void reverse() {
             iterator begin_it = begin(), end_it = end();
             while (begin_it != end_it) {
-                std::swap(begin_it.node->prev_, begin_it.node->next);
+                std::swap(begin_it.node_->prev_, begin_it.node_->next_);
                 --begin_it;
             }
-            std::swap(head_->prev_, head_->next);
+            std::swap(head_->prev_, head_->next_);
         }
         void unique() { // проверить на практике
             iterator begin_it = begin(), end_it = end(), begin_plus_it = ++begin();
@@ -221,15 +219,14 @@ namespace s21 {
         
         class ListIterator {
             public:
-            // friend class list;
             friend list::iterator list::insert(iterator pos, const_reference value);
             friend void list::erase(iterator pos);
             friend void list::clear();
-            friend void list::splice(const_iterator pos, list& other);
+            friend void list::splice(const_iterator pos, list& other) noexcept;
             friend void list::reverse();
+            friend void list::merge(list& other);
 
-            ListIterator() = delete;
-            // ListIterator(const List& it) {}
+            ListIterator();
             explicit ListIterator(ListNode *node) : node_(node) {}
             // explicit ListIterator(ListIterator it) {} // как будто конструктор по умолчанию должен эту тему сделать сам
 
@@ -276,16 +273,15 @@ namespace s21 {
             }
             
             private:
-            ListNode* node_{nullptr};
+            ListNode* node_;
         };
 
 
         class ListConstIterator : public ListIterator {
             public:
-            // friend class list;
-
-            ListConstIterator() = delete;
-            ListConstIterator(const ListNode *node) : node_(node) {}
+            friend void list::splice(const_iterator pos, list& other) noexcept;
+            ListConstIterator();
+            explicit ListConstIterator(ListNode *node) : node_(node) {}
 
             const_iterator& operator++() {
                 node_ = node_->next_;
@@ -330,21 +326,14 @@ namespace s21 {
             }
 
             private:
-            ListNode* node_{nullptr};
+            ListNode* node_;
         };
 
         private:
 
-        class ListNode { // инкапсуляция для класса, дружественный класс лист для доступа ко всем полям и методам. звучит как норм тема
-            // public:
-            // friend class list;
-            // private: // мне казалось, что если в приватном поле объявить дружественность к листу, то весь класс будет у листа в приватном поле, но это так не работает
-            // задумался о варианте с наследованием, если итераторы наследовать от нода, чтобы дополнять его функционал и сохранять инкапсуляцию
-            // friend class ListIterator;
+        class ListNode {
             public:
 
-            // friend void list::erase(iterator pos);
-            // friend void list::clear();
             ListNode() : next_(this), prev_(this), data_(value_type{}) {}
             explicit ListNode(const_reference value) : next_(nullptr), prev_(nullptr), data_(value) {}
             // explicit ListNode(ListNode); // кароч конструктор по другому узлу. он мне нужен?? 
@@ -359,14 +348,13 @@ namespace s21 {
             void Unbind() {
                 prev_->next_ = next_;
                 next_->prev_ = prev_;
-                next_ = nullptr; // u antona po drugomu, poch?
-                prev_ = nullptr; // u antona po drugomu, poch?
+                next_ = nullptr;
+                prev_ = nullptr;
             }
 
-            // private:
-            value_type data_;
-            ListNode *prev_;
             ListNode *next_;
+            ListNode *prev_;
+            value_type data_;
         };
 
         ListNode *head_;
@@ -380,12 +368,4 @@ namespace s21 {
 
 }  // namespace s21
 
-// #include "list.tpp"
-/*
-
-следить за тем, что необязательно реализовывать все методы,
-некоторые возможно будут дублироваться,
-а некоторых возможно и вовсе не хватает
-
-*/
 #endif  // CPP2_S21_CONTAINERS_S21_CONTAINERS_LIST_S21_LIST_H_
