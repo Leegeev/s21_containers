@@ -12,7 +12,8 @@ namespace s21 {
     template <typename T>
     class list {
         private:
-        class ListNode;
+        class ListNode; // добавил френд, потому что поле даты в узле не видело свой тип
+        friend class ListNode;
 
         public:
         class ListIterator;
@@ -25,25 +26,73 @@ namespace s21 {
         using const_iterator = list<value_type>::ListConstIterator<value_type>;
         using size_type = std::size_t;
 
-        list() : head_(nullptr), size_(value_type{}) {}
+        list() : head_(new ListNode{}), size_(value_type{}) {}
 
-        explicit list(size_type n) {
+        explicit list(size_type n) : list() {
             for (; n > 0; n--, push_back(value_type{}))
         }
 
-        list(std::initializer_list<value_type> const &items); // посмотри видос про списки инициализации
+        list(std::initializer_list<value_type> const &items) : list() {
+            for (auto item : items) {
+                push_back(item);
+            }
+        } // посмотри видос про списки инициализации
 
-        list(const list &l);
-
-        list(list &&l);
-
-        ~list() {
-            while (head_ != nullptr) pop_front();
+        list(const list &l) : list() {
+            for (auto item : l) {
+                push_back(item);
+            }
         }
 
-        list& operator=(list &&l);
-        list& operator=(const list& other)
+        list(list &&l) : list() {
+            splice(begin(), l);
+        }
 
+        ~list() {
+            clear();
+            delete head_;
+            head_ = nullptr;
+        }
+
+        list& operator=(list &&l) {
+            if (this != other) {
+                clear();
+                splice(begin(), l);
+            }
+            return *this;
+        }
+        
+        list& operator=(const list& other) {
+            if (this != other) {
+                ListIterator tbegin = begin(), tend = end();
+                ListConstIterator obegin = other.begin(), oend = other.end();
+
+                while (tbegin != tend && obegin != oend) {
+                    *tbegin = *obegin;
+                    ++tbegin;
+                    ++obegin;
+                }
+
+                ListIterator tmp = tbegin;
+                while (tbegin != tend) {
+                    ++tbegin;
+                    erase(tmp);
+                    tmp = tbegin;
+                }
+
+                while (obegin != oend) {
+                    push_back(*obegin);
+                    ++obegin;
+                }
+            }
+        }
+
+        reference front() {
+            return *begin();
+        }
+        reference back() {
+            return *(end()--);
+        }
         const_reference front() {
             return *begin();
         }
@@ -59,10 +108,10 @@ namespace s21 {
         }
 
         ListConstIterator cbegin() const {
-            // return ListConstIterator(head_->next_);
+            return ListConstIterator(head_->next_);
         }
         ListConstIterator cend() const {
-            // return ListConstIterator(head_);
+            return ListConstIterator(head_);
         }
 
         bool empty() {
@@ -72,11 +121,13 @@ namespace s21 {
         size_type size() const {
             return size_;
         }
-        size_type max_size();
+        size_type max_size() {
+            return std::numeric_limits<size_type>::max() / sizeof(ListNode) / 2 - 1;
+        }
 
         void clear() { // тут нужно выбрать самый оптимальный метод удаления элемента
             while (size_) {
-                pop_front();
+                erase(begin());
             }
         }
         iterator insert(iterator pos, const_reference value) {
@@ -143,9 +194,14 @@ namespace s21 {
             other.head_->prev_ = other.head_;
         }
         void reverse() {
-
+            ListIterator begin_it = begin(), end_it = end();
+            while (begin_it != end_it) {
+                std::swap(begin_it.node->prev_, begin_it.node->next);
+                --begin_it;
+            }
+            std::swap(head_.node->prev_, head_.node->next);
         }
-        void unique() {
+        void unique() { // проверить на практике
             ListIterator begin_it = begin(), end_it = end(), begin_plus_it = ++begin();
             while (begin_plus_it != end_it) {
                 if (*begin_it == *begin_plus_it) {
@@ -157,24 +213,60 @@ namespace s21 {
                 }
             }
         }
-        void sort();
+        void sort() {
+            
+        }
         
         class ListIterator {
             public:
             // friend class list;
 
             ListIterator() = delete;
-            ListIterator(const List& it);
+            // ListIterator(const List& it) {}
+            explicit ListIterator(ListNode *node) : node_(node) {}
+            // explicit ListIterator(ListIterator it) {} // как будто конструктор по умолчанию должен эту тему сделать сам
 
-            ListIterator& operator++();
-            ListIterator& operator--();
-            ListIterator operator++(int);
-            ListIterator operator--(int);
-            bool operator==(const ListIterator &other) const;
-            bool operator!=(const ListIterator &other) const;
-            ListIterator operator+(size_type n) const;
-            ListIterator operator-(size_type n) const;
-            reference operator*() const;
+            ListIterator& operator++() {
+                node_ = node_->next_;
+                return *this;
+            }
+            ListIterator& operator--() {
+                node = node_->prev_;
+                return *this;
+            }
+            ListIterator operator++(int) {
+                ListIterator tmp{node_};
+                node_ = node_->next_;
+                return tmp;
+            }
+            ListIterator operator--(int) { 
+                ListIterator tmp{node_};
+                node_ = node_->prev_;
+                return tmp;
+            }
+            bool operator==(const ListIterator &other) const {
+                return node_ == other.node_;
+            }
+            bool operator!=(const ListIterator &other) const {
+                return node_ != other.node_;
+            }
+            ListIterator operator+(size_type n) const {
+                ListIterator tmp{node_}
+                for (;n > 0; n--) {
+                    ++tmp;
+                }
+                return tmp;
+            }
+            ListIterator operator-(size_type n) const {
+                ListIterator tmp{node_}
+                for (;n > 0; n--) {
+                    --tmp;
+                }
+                return tmp;
+            }
+            reference operator*() const {
+                return node_.data_;
+            }
             
             private:
             ListNode* node_{nullptr};
@@ -186,35 +278,67 @@ namespace s21 {
             // friend class list;
 
             ListConstIterator() = delete;
-            ListConstIterator(const List& it);
+            ListConstIterator(const ListNode *node) : node_(node) {}
 
-            ListConstIterator& operator++();
-            ListConstIterator& operator--();
-            ListConstIterator operator++(int);
-            ListConstIterator operator--(int);
-            bool operator==(const ListConstIterator &other) const;
-            bool operator!=(const ListConstIterator &other) const;
-            ListConstIterator operator+(size_type n) const;
-            ListConstIterator operator-(size_type n) const;
-            reference operator*() const;
+            ListConstIterator& operator++() {
+                node_ = node_->next_;
+                return *this;
+            }
+            ListConstIterator& operator--() {
+                node_ = node_->prev_;
+                return *this;
+            }
+            ListConstIterator operator++(int) {
+                ListConstIterator tmp{node_};
+                node_ = node_->next_;
+                return tmp;
+            }
+            ListConstIterator operator--(int) {
+                ListConstIterator tmp{node_};
+                node_ = node_->prev_;
+                return tmp;
+            }
+            bool operator==(const ListConstIterator &other) const {
+                return node_ == other.node_;
+            }
+            bool operator!=(const ListConstIterator &other) const {
+                return node_ != other.node_;
+            }
+            ListConstIterator operator+(size_type n) const {
+                ListConstIterator tmp{node_}
+                for (;n > 0; n--) {
+                    ++tmp;
+                }
+                return tmp;
+            }
+            ListConstIterator operator-(size_type n) const {
+                ListConstIterator tmp{node_}
+                for (;n > 0; n--) {
+                    --tmp;
+                }
+                return tmp;
+            }
+            const_reference operator*() const {
+                return node_.data_;
+            }
 
             private:
             ListNode* node_{nullptr};
         };
 
         private:
-        ListNode *head_;
-        size_type size_;
 
         class ListNode { // инкапсуляция для класса, дружественный класс лист для доступа ко всем полям и методам. звучит как норм тема
             // public:
             // friend class list;
-            private:
-            friend class ListIterator;
+            // private: // мне казалось, что если в приватном поле объявить дружественность к листу, то весь класс будет у листа в приватном поле, но это так не работает
+            // задумался о варианте с наследованием, если итераторы наследовать от нода, чтобы дополнять его функционал и сохранять инкапсуляцию
+            // friend class ListIterator;
+            public:
 
             ListNode() : next_(this), prev_(this), data_(value_type{}) {}
             explicit ListNode(const_reference value) : next_(nullptr), prev_(nullptr), data_(value) {}
-            explicit ListNode(ListNode) // кароч конструктор по другому узлу
+            explicit ListNode(ListNode) // кароч конструктор по другому узлу. он мне нужен?? 
 
             BindBeforeCurrent(ListNode* new_node) {
                 new_node->next_ = this;
@@ -230,18 +354,22 @@ namespace s21 {
                 prev_ = nullptr; // u antona po drugomu, poch?
             }
 
-            private:
+            // private:
             value_type data_;
             ListNode *prev_;
             ListNode *next_;
         };
+
+        ListNode *head_;
+        size_type size_;
+
 
 
     };
 
 
 
-}
+}  // namespace s21
 
 // #include "list.tpp"
 /*
