@@ -233,39 +233,39 @@ namespace s21 {
             explicit ListIterator(ListNode *node) : node_(node) {}
             // explicit ListIterator(ListIterator it) {} // как будто конструктор по умолчанию должен эту тему сделать сам
 
-            ListIterator& operator++() {
+            iterator& operator++() {
                 node_ = node_->next_;
                 return *this;
             }
-            ListIterator& operator--() {
+            iterator& operator--() {
                 node_ = node_->prev_;
                 return *this;
             }
-            ListIterator operator++(int) {
-                ListIterator tmp{node_};
+            iterator operator++(int) {
+                iterator tmp{node_};
                 node_ = node_->next_;
                 return tmp;
             }
-            ListIterator operator--(int) { 
-                ListIterator tmp{node_};
+            iterator operator--(int) { 
+                iterator tmp{node_};
                 node_ = node_->prev_;
                 return tmp;
             }
-            bool operator==(const ListIterator &other) const {
+            bool operator==(const iterator &other) const {
                 return node_ == other.node_;
             }
-            bool operator!=(const ListIterator &other) const {
+            bool operator!=(const iterator &other) const {
                 return node_ != other.node_;
             }
-            ListIterator operator+(size_type n) const {
-                ListIterator tmp{node_};
+            iterator operator+(size_type n) const {
+                iterator tmp{node_};
                 for (;n > 0; n--) {
                     ++tmp;
                 }
                 return tmp;
             }
-            ListIterator operator-(size_type n) const {
-                ListIterator tmp{node_};
+            iterator operator-(size_type n) const {
+                iterator tmp{node_};
                 for (;n > 0; n--) {
                     --tmp;
                 }
@@ -287,39 +287,39 @@ namespace s21 {
             ListConstIterator() = delete;
             ListConstIterator(const ListNode *node) : node_(node) {}
 
-            ListConstIterator& operator++() {
+            const_iterator& operator++() {
                 node_ = node_->next_;
                 return *this;
             }
-            ListConstIterator& operator--() {
+            const_iterator& operator--() {
                 node_ = node_->prev_;
                 return *this;
             }
-            ListConstIterator operator++(int) {
-                ListConstIterator tmp{node_};
+            const_iterator operator++(int) {
+                const_iterator tmp{node_};
                 node_ = node_->next_;
                 return tmp;
             }
-            ListConstIterator operator--(int) {
-                ListConstIterator tmp{node_};
+            const_iterator operator--(int) {
+                const_iterator tmp{node_};
                 node_ = node_->prev_;
                 return tmp;
             }
-            bool operator==(const ListConstIterator &other) const {
+            bool operator==(const const_iterator &other) const {
                 return node_ == other.node_;
             }
-            bool operator!=(const ListConstIterator &other) const {
+            bool operator!=(const const_iterator &other) const {
                 return node_ != other.node_;
             }
-            ListConstIterator operator+(size_type n) const {
-                ListConstIterator tmp{node_};
+            const_iterator operator+(size_type n) const {
+                const_iterator tmp{node_};
                 for (;n > 0; n--) {
                     ++tmp;
                 }
                 return tmp;
             }
-            ListConstIterator operator-(size_type n) const {
-                ListConstIterator tmp{node_};
+            const_iterator operator-(size_type n) const {
+                const_iterator tmp{node_};
                 for (;n > 0; n--) {
                     --tmp;
                 }
