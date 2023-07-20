@@ -22,14 +22,14 @@ namespace s21 {
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
-        using iterator = list<value_type>::ListIterator<value_type>;
-        using const_iterator = list<value_type>::ListConstIterator<value_type>;
+        using iterator = list<value_type>::ListIterator;
+        using const_iterator = list<value_type>::ListConstIterator;
         using size_type = std::size_t;
 
         list() : head_(new ListNode{}), size_(value_type{}) {}
 
         explicit list(size_type n) : list() {
-            for (; n > 0; n--, push_back(value_type{}))
+            for (; n > 0; n--, push_back(value_type{}));
         }
 
         list(std::initializer_list<value_type> const &items) : list() {
@@ -55,7 +55,7 @@ namespace s21 {
         }
 
         list& operator=(list &&l) {
-            if (this != other) {
+            if (this != l) {
                 clear();
                 splice(begin(), l);
             }
@@ -64,8 +64,8 @@ namespace s21 {
         
         list& operator=(const list& other) {
             if (this != other) {
-                ListIterator tbegin = begin(), tend = end();
-                ListConstIterator obegin = other.begin(), oend = other.end();
+                iterator tbegin = begin(), tend = end();
+                const_iterator obegin = other.begin(), oend = other.end();
 
                 while (tbegin != tend && obegin != oend) {
                     *tbegin = *obegin;
@@ -73,7 +73,7 @@ namespace s21 {
                     ++obegin;
                 }
 
-                ListIterator tmp = tbegin;
+                iterator tmp = tbegin;
                 while (tbegin != tend) {
                     ++tbegin;
                     erase(tmp);
@@ -87,12 +87,14 @@ namespace s21 {
             }
         }
 
+        /*
         reference front() {
             return *begin();
         }
         reference back() {
             return *(end()--);
         }
+        */
         const_reference front() {
             return *begin();
         }
@@ -100,18 +102,18 @@ namespace s21 {
             return *(end()--);
         }
 
-        ListIterator begin() {
-            return ListIterator(head_->next_);
+        iterator begin() {
+            return iterator(head_->next_);
         }
-        ListIterator end() {
-            return ListIterator(head_);
+        iterator end() {
+            return iterator(head_);
         }
 
-        ListConstIterator cbegin() const {
-            return ListConstIterator(head_->next_);
+        const_iterator cbegin() const {
+            return const_iterator(head_->next_);
         }
-        ListConstIterator cend() const {
-            return ListConstIterator(head_);
+        const_iterator cend() const {
+            return const_iterator(head_);
         }
 
         bool empty() {
@@ -139,8 +141,8 @@ namespace s21 {
             return iterator(new_node); // можно ли вернуть текущий итератор, но +1?
         }
         void erase(iterator pos) {
-            if (pos != head_) {
-                pos.node_->UnBind();
+            if (pos.node_ != head_) {
+                pos.node_->Unbind();
                 delete pos.node_;
                 --size_;
             }
@@ -180,8 +182,8 @@ namespace s21 {
             splice(end(), other);
             other.size_ = 0;
         }
-        void splice(ListConstIterator pos, list& other) {
-            ListIterator pre_pos = pos - 1, olast = --other.end(), ofirst = other.begin();
+        void splice(const_iterator pos, list& other) {
+            iterator pre_pos = pos - 1, olast = --other.end(), ofirst = other.begin();
             olast.node_->next = pos.node_;
             pos.node_->prev_ = olast.node_;
 
@@ -194,15 +196,15 @@ namespace s21 {
             other.head_->prev_ = other.head_;
         }
         void reverse() {
-            ListIterator begin_it = begin(), end_it = end();
+            iterator begin_it = begin(), end_it = end();
             while (begin_it != end_it) {
                 std::swap(begin_it.node->prev_, begin_it.node->next);
                 --begin_it;
             }
-            std::swap(head_.node->prev_, head_.node->next);
+            std::swap(head_->prev_, head_->next);
         }
         void unique() { // проверить на практике
-            ListIterator begin_it = begin(), end_it = end(), begin_plus_it = ++begin();
+            iterator begin_it = begin(), end_it = end(), begin_plus_it = ++begin();
             while (begin_plus_it != end_it) {
                 if (*begin_it == *begin_plus_it) {
                     erase(begin_plus_it);
@@ -220,6 +222,11 @@ namespace s21 {
         class ListIterator {
             public:
             // friend class list;
+            friend list::iterator list::insert(iterator pos, const_reference value);
+            friend void list::erase(iterator pos);
+            friend void list::clear();
+            friend void list::splice(const_iterator pos, list& other);
+            friend void list::reverse();
 
             ListIterator() = delete;
             // ListIterator(const List& it) {}
@@ -231,7 +238,7 @@ namespace s21 {
                 return *this;
             }
             ListIterator& operator--() {
-                node = node_->prev_;
+                node_ = node_->prev_;
                 return *this;
             }
             ListIterator operator++(int) {
@@ -251,21 +258,21 @@ namespace s21 {
                 return node_ != other.node_;
             }
             ListIterator operator+(size_type n) const {
-                ListIterator tmp{node_}
+                ListIterator tmp{node_};
                 for (;n > 0; n--) {
                     ++tmp;
                 }
                 return tmp;
             }
             ListIterator operator-(size_type n) const {
-                ListIterator tmp{node_}
+                ListIterator tmp{node_};
                 for (;n > 0; n--) {
                     --tmp;
                 }
                 return tmp;
             }
             reference operator*() const {
-                return node_.data_;
+                return node_->data_;
             }
             
             private:
@@ -305,21 +312,21 @@ namespace s21 {
                 return node_ != other.node_;
             }
             ListConstIterator operator+(size_type n) const {
-                ListConstIterator tmp{node_}
+                ListConstIterator tmp{node_};
                 for (;n > 0; n--) {
                     ++tmp;
                 }
                 return tmp;
             }
             ListConstIterator operator-(size_type n) const {
-                ListConstIterator tmp{node_}
+                ListConstIterator tmp{node_};
                 for (;n > 0; n--) {
                     --tmp;
                 }
                 return tmp;
             }
             const_reference operator*() const {
-                return node_.data_;
+                return node_->data_;
             }
 
             private:
@@ -336,18 +343,20 @@ namespace s21 {
             // friend class ListIterator;
             public:
 
+            // friend void list::erase(iterator pos);
+            // friend void list::clear();
             ListNode() : next_(this), prev_(this), data_(value_type{}) {}
             explicit ListNode(const_reference value) : next_(nullptr), prev_(nullptr), data_(value) {}
-            explicit ListNode(ListNode) // кароч конструктор по другому узлу. он мне нужен?? 
+            // explicit ListNode(ListNode); // кароч конструктор по другому узлу. он мне нужен?? 
 
-            BindBeforeCurrent(ListNode* new_node) {
+            void BindBeforeCurrent(ListNode* new_node) {
                 new_node->next_ = this;
                 new_node->prev_ = prev_;
                 prev_->next_ = new_node;
                 prev_ = new_node;
             }
 
-            Unbind() {
+            void Unbind() {
                 prev_->next_ = next_;
                 next_->prev_ = prev_;
                 next_ = nullptr; // u antona po drugomu, poch?
