@@ -313,7 +313,7 @@ class s21_vector {
       }
     }
     size_ = count;
-  }
+ }
 
   // iterators
   iterator begin() noexcept { return iterator(arr_); }
