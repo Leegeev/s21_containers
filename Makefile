@@ -1,22 +1,30 @@
-CC= g++ 
-CFLAGS= -Wall -Wextra -Werror
-STANDART= -std=c++17
-TESTFLAGS=-g -lgtest
-TESTFILES= tests/*.cc
+CXX=g++ -std=c++17
+FLAGS=-Wall -Wextra -Werror
 
-all: gcov_report
+LIBS=-lgtest -lgtest_main
+OPEN=xdg-open
+
+ifeq ($(shell uname -s), Darwin)
+	OPEN=open
+else
+	LIBS+=-lm
+	OPEN=xdg-open
+endif
+
+all: test
 
 test: clean
-	$(CC) $(CFLAGS) $(STANDART) $(TESTFILES) -o test $(TESTFLAGS)
+	$(CXX) $(FLAG) s21_tests.cc $(LIBS) -o test
 	./test
 
 gcov_report: clean
-	$(CC) $(CFLAGS) --coverage $(STANDART) $(TESTFILES) -o test $(TESTFLAGS)
+	$(CXX) $(FLAG) --coverage s21_tests.cc $(LIBS) -o test
 	./test
-	lcov -t "test" -o test.info -c -d . --no-external
-	genhtml -o report test.info
-	open report/index.html
+	@gcovr -r . --html --html-details -o report.html
+	@$(OPEN) report.html 2>/dev/null
+
+style:
+	clang-format -n --style=Google *.cc *.h containers/*.h tests/*.cc
 
 clean:
-	rm -rf *.out *.o s21_matrix_oop.a *.gcda *.gcno *.info test main
-	rm -rf report
+	rm -rf *.o *.gcda *gcno *.html *.css test
